@@ -37,9 +37,9 @@ public:
       cfg.pin_rst = 4;
       cfg.pin_busy = -1;
       cfg.panel_width = 240;
-      cfg.panel_height = 280;
+      cfg.panel_height = 320;
       cfg.offset_x = 0;
-      cfg.offset_y = 20;
+      cfg.offset_y = 0;
       cfg.offset_rotation = 0;
       cfg.dummy_read_pixel = 8;
       cfg.dummy_read_bits = 1;
@@ -54,9 +54,10 @@ public:
 };
 
 LGFX tft;
+// base tft object to be used in ui functions
+/*
 
-
-/*==================== TIPOS ====================*/
+//==================== TIPOS ====================
 
 typedef enum {
     UI_EVT_NONE = 0,
@@ -75,22 +76,25 @@ typedef enum {
     UI_SCREEN_ERROR
 } ui_screen_t;
 
-/*==================== CONTEXTO ====================*/
+//==================== CONTEXTO ====================
 
 static ui_screen_t current_screen = UI_SCREEN_SPLASH;
 static int menu_index = 0;
+static bool ui_dirty = true;
+static int last_menu_index = -1;
 
-/*==================== PROTOTIPOS ====================*/
+//==================== PROTOTIPOS ====================
 
 static void draw_splash();
 static void draw_home();
 static void draw_config();
 static void draw_running();
 static void draw_error();
+static void update_home_selector();
 
 static void process_event(ui_event_t evt);
 
-/*==================== INIT ====================*/
+//==================== INIT ====================
 
 void ui_init()
 {
@@ -103,10 +107,15 @@ void ui_init()
     gpio_set_level(GPIO_NUM_15, 1);
 }
 
-/*==================== UPDATE ====================*/
+//==================== UPDATE ====================
 
 void ui_update()
 {
+    if(!ui_dirty && current_screen != UI_SCREEN_HOME)
+        return;
+
+    ui_dirty = false;
+
     switch(current_screen)
     {
         case UI_SCREEN_SPLASH:
@@ -114,7 +123,16 @@ void ui_update()
             break;
 
         case UI_SCREEN_HOME:
-            draw_home();
+            if(last_menu_index == -1)
+            {
+                draw_home();              // dibuja base una sola vez
+                last_menu_index = menu_index;
+            }
+            else if(menu_index != last_menu_index)
+            {
+                update_home_selector();   // solo mueve cursor
+                last_menu_index = menu_index;
+            }
             break;
 
         case UI_SCREEN_CONFIG:
@@ -131,7 +149,7 @@ void ui_update()
     }
 }
 
-/*==================== EVENTOS ====================*/
+//==================== EVENTOS ====================
 
 void ui_send_event(int evt)
 {
@@ -162,14 +180,20 @@ static void process_event(ui_event_t evt)
                 {
                     case 0:
                         current_screen = UI_SCREEN_CONFIG;
+                        ui_dirty = true;   
+                        last_menu_index = -1;
                         break;
 
                     case 1:
                         current_screen = UI_SCREEN_RUNNING;
+                        ui_dirty = true;
+                        last_menu_index = -1;
                         break;
 
                     case 2:
                         current_screen = UI_SCREEN_ERROR;
+                        ui_dirty = true;
+                        last_menu_index = -1;
                         break;
                 }
             }
@@ -214,7 +238,7 @@ static void process_event(ui_event_t evt)
 }
 
 
-/*==================== DRAW FUNCTIONS ====================*/
+//==================== DRAW FUNCTIONS ====================
 
 static void draw_splash()
 {
@@ -222,16 +246,32 @@ static void draw_splash()
     tft.setTextColor(TFT_GREEN);
     tft.drawString("VIBRATION TABLE", 20, 40);
     tft.drawString("Booting...", 20, 80);
+    
+    
 }
 
+static void update_home_selector()
+{
+    
+    tft.fillRect(20, 60, 15, 80, TFT_BLACK);
+
+    int y = 60 + (menu_index * 30);
+
+    tft.setTextColor(TFT_GREEN);
+    tft.drawString(">", 20, y);
+}
 static void draw_home()
 {
     tft.fillScreen(TFT_BLACK);
+
     tft.setTextColor(TFT_WHITE);
     tft.drawString("HOME", 20, 20);
 
-    tft.drawString("Freq: 50 Hz", 20, 60);
-    tft.drawString("Time: 10 min", 20, 90);
+    tft.drawString("Configuracion", 40, 60);
+    tft.drawString("Ejecutar", 40, 90);
+    tft.drawString("Errores", 40, 120);
+
+    update_home_selector();   // dibuja cursor inicial
 }
 
 static void draw_config()
@@ -262,3 +302,50 @@ static void draw_error()
 
     tft.drawString("Code: E01", 20, 60);
 }
+*/
+
+// Código de prueba para validar conexión tft
+/*
+void tft_test()
+{
+    tft.init();
+    tft.setRotation(1);
+    tft.fillScreen(TFT_BLACK);
+
+    // Test colores
+    tft.fillScreen(TFT_RED);
+    vTaskDelay(pdMS_TO_TICKS(500));
+
+    tft.fillScreen(TFT_GREEN);
+    vTaskDelay(pdMS_TO_TICKS(500));
+
+    tft.fillScreen(TFT_BLUE);
+    vTaskDelay(pdMS_TO_TICKS(500));
+
+    tft.fillScreen(TFT_BLACK);
+
+    // Test texto
+    tft.setTextColor(TFT_WHITE);
+    tft.drawString("TEST TFT OK", 40, 40);
+
+    tft.setTextColor(TFT_YELLOW);
+    tft.drawString("SPI OK", 40, 80);
+
+    tft.setTextColor(TFT_CYAN);
+    tft.drawString("ST7789 RUNNING", 40, 120);
+
+    vTaskDelay(pdMS_TO_TICKS(1500));
+
+    // Test líneas
+    tft.drawLine(0, 0, 240, 320, TFT_RED);
+    tft.drawLine(240, 0, 0, 320, TFT_GREEN);
+
+    vTaskDelay(pdMS_TO_TICKS(1000));
+
+    // Test rectángulos
+    tft.fillRect(60, 60, 120, 80, TFT_BLUE);
+    tft.drawRect(60, 60, 120, 80, TFT_WHITE);
+
+    vTaskDelay(pdMS_TO_TICKS(1000));
+}
+*/

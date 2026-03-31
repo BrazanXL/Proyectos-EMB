@@ -11,7 +11,9 @@ typedef enum {
     EVT_ENC_RIGHT,
     EVT_ENC_CLICK,
     EVT_BTN_BACK,
-    EVT_BTN_START
+    EVT_BTN_START,
+    EVT_FIN1,
+    EVT_FIN2
 } input_event_t;
 
 void input_init(void);

@@ -11,6 +11,9 @@
 #define PIN_ENC_BTN    32
 #define PIN_BTN_BACK   25
 #define PIN_BTN_START  26
+#define PIN_FIN1       33
+#define PIN_FIN2       27
+
 
 // ====== DEBOUNCE ======
 #define DEBOUNCE_MS 30
@@ -36,6 +39,8 @@ typedef struct {
 static btn_t btn_back  = { (gpio_num_t)PIN_BTN_BACK, 1, 0 };
 static btn_t btn_start = { (gpio_num_t)PIN_BTN_START, 1, 0 };
 static btn_t btn_enc   = { (gpio_num_t)PIN_ENC_BTN, 1, 0 };
+static btn_t btn_fin1  = { (gpio_num_t)PIN_FIN1,1,0};
+static btn_t btn_fin2  = { (gpio_num_t)PIN_FIN2,1,0};
 
 // ====== UTIL ======
 static inline uint32_t millis()
@@ -60,7 +65,9 @@ void input_init(void)
     btn.pin_bit_mask =
         (1ULL << PIN_ENC_BTN) |
         (1ULL << PIN_BTN_BACK) |
-        (1ULL << PIN_BTN_START);
+        (1ULL << PIN_BTN_START)|
+        (1ULL << PIN_FIN1)|
+        (1ULL << PIN_FIN2);
     btn.pull_up_en = GPIO_PULLUP_ENABLE;
     btn.pull_down_en = GPIO_PULLDOWN_DISABLE;
     gpio_config(&btn);
@@ -126,6 +133,8 @@ void input_task(void *arg)
         read_button(&btn_enc,   EVT_ENC_CLICK);
         read_button(&btn_back,  EVT_BTN_BACK);
         read_button(&btn_start, EVT_BTN_START);
+        read_button(&btn_fin1,  EVT_FIN1);
+        read_button(&btn_fin2, EVT_FIN2);
 
         vTaskDelay(pdMS_TO_TICKS(5)); // 200 Hz
     }

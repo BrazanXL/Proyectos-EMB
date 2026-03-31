@@ -6,6 +6,7 @@ extern "C" {
 #endif
 
 void ui_init();
+void tft_test();
 void ui_update();
 void ui_send_event(int evt);
 
